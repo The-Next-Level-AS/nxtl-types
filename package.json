@@ -1,5 +1,5 @@
 {
-  "name": "@the-next-level-as/nxtl-types",
+  "name": "@nxtl/nxtl-types",
   "version": "0.1.0",
   "description": "TypeScript contracts for all NXTL API endpoints.",
   "type": "module",
