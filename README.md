@@ -5,7 +5,7 @@ TypeScript request/response contracts for every NXTL API endpoint.
 ## Install
 
 ```bash
-npm install @the-next-level-as/nxtl-types
+npm install @nxtl/nxtl-types
 ```
 
 ## Build
