@@ -5,7 +5,7 @@ TypeScript request/response contracts for every NXTL API endpoint.
 ## Install
 
 ```bash
-npm install
+npm install @the-next-level-as/nxtl-types
 ```
 
 ## Build
@@ -22,7 +22,7 @@ import type {
   ConversationResult,
   RequestOf,
   ResultOf,
-} from "nxtl-types";
+} from "@the-next-level-as/nxtl-types";
 
 const request: ConversationRequest = {
   projectId: "abc12345",

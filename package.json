@@ -1,7 +1,6 @@
 {
-  "name": "nxtl-types",
+  "name": "@the-next-level-as/nxtl-types",
   "version": "0.1.0",
-  "private": true,
   "description": "TypeScript contracts for all NXTL API endpoints.",
   "type": "module",
   "main": "dist/index.js",
@@ -15,5 +14,14 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/The-Next-Level-AS/nxtl-types.git"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
   }
 }
