@@ -19,7 +19,9 @@ export const NXTL_ENDPOINTS = {
         auth: "apiKey",
     },
     crudEntries: { method: "GET", path: "/crud/entries", auth: "apiKey" },
+    crudEvals: { method: "GET", path: "/crud/evals", auth: "apiKey" },
     crudMatrices: { method: "GET", path: "/crud/matrices", auth: "apiKey" },
+    crudMatrix: { method: "GET", path: "/crud/matrix", auth: "apiKey" },
     crudRetrieveEntries: {
         method: "POST",
         path: "/crud/retrieveEntries",
@@ -31,12 +33,22 @@ export const NXTL_ENDPOINTS = {
         auth: "apiKey",
     },
     crudSetMatrix: { method: "POST", path: "/crud/setMatrix", auth: "apiKey" },
+    crudSetMatrixSecondPass: {
+        method: "POST",
+        path: "/crud/setMatrixSecondPass",
+        auth: "apiKey",
+    },
     crudSyncEntries: {
         method: "POST",
         path: "/crud/syncEntries",
         auth: "apiKey",
     },
     crudSyncEntry: { method: "POST", path: "/crud/syncEntry", auth: "apiKey" },
+    crudGlobalToneOfVoiceGet: {
+        method: "GET",
+        path: "/crud/globalToneOfVoice",
+        auth: "apiKey",
+    },
     crudGlobalToneOfVoice: {
         method: "POST",
         path: "/crud/globalToneOfVoice",
@@ -47,9 +59,25 @@ export const NXTL_ENDPOINTS = {
         path: "/crud/userJourneys",
         auth: "apiKey",
     },
+    crudUserJourneyGet: {
+        method: "GET",
+        path: "/crud/userJourney",
+        auth: "apiKey",
+    },
+    crudUserJourneyPatch: {
+        method: "PATCH",
+        path: "/crud/userJourney",
+        auth: "apiKey",
+    },
     crudUserJourneysSet: {
         method: "POST",
         path: "/crud/userJourneys",
+        auth: "apiKey",
+    },
+    crudRevisions: { method: "GET", path: "/crud/revisions", auth: "apiKey" },
+    crudRevisionsRollback: {
+        method: "POST",
+        path: "/crud/revisions/rollback",
         auth: "apiKey",
     },
     crudUsage: { method: "GET", path: "/crud/usage", auth: "apiKey" },

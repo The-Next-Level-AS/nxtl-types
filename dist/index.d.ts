@@ -1,4 +1,4 @@
-export type HttpMethod = "GET" | "POST" | "DELETE";
+export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
 export type AuthScheme = "apiKey" | "bearer" | "none";
 export type ServerErrorResponse = string;
 export interface UnauthorizedResponse {
@@ -18,19 +18,21 @@ export interface JsonObject {
 export interface JsonArray extends Array<JsonValue> {
 }
 export interface BaseProjectRequest {
-    projectId: string;
+    organizationId?: string;
+    projectId?: string;
+}
+export interface OptionalUserRequest {
+    userId?: string;
 }
 export interface Artifact {
     formula: string;
     content: string;
     hash: string;
-    [key: string]: unknown;
 }
 export interface Entry {
     id: string;
     summary?: string | null;
     full: string;
-    [key: string]: unknown;
 }
 export interface RetrievedEntry extends Entry {
     vec_sim: number;
@@ -39,18 +41,15 @@ export interface Matrix {
     path: string;
     summary?: string | null;
     response?: string | null;
-    [key: string]: unknown;
+    locked?: 0 | 1;
 }
 export interface UserJourneyRecord {
-    userjourneypk?: number | null;
-    projectid?: string | null;
     name: string;
     parent?: string | null;
     description?: string | null;
-    toneofvoice?: string | null;
-    userneeds?: string | null;
-    businessgoals?: string | null;
-    [key: string]: unknown;
+    toneOfVoice?: string | null;
+    userNeeds?: string | null;
+    businessGoals?: string | null;
 }
 export interface ConversationRequest extends BaseProjectRequest {
     history: string;
@@ -100,7 +99,6 @@ export interface RerankingEntryInput {
     summary: string | null;
     full: string;
     vec_sim: number;
-    [key: string]: unknown;
 }
 export interface RerankingRequest extends BaseProjectRequest {
     entries: RerankingEntryInput[];
@@ -111,7 +109,6 @@ export interface RerankingRequest extends BaseProjectRequest {
 export interface RerankedEntry {
     id: string;
     full: string;
-    [key: string]: unknown;
 }
 export interface RerankingResponse {
     filtered_entries: RerankedEntry[];
@@ -176,6 +173,12 @@ export type TransformationResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface ArtifactListRequest extends BaseProjectRequest {
+    view?: "full" | "compact";
+    page?: number;
+    pageSize?: number;
+    search?: string;
+}
 export interface GetProjectRequest extends BaseProjectRequest {
 }
 export type CrudArtifactsResult = {
@@ -227,6 +230,12 @@ export type CrudDeleteUserJourneyResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface EntryListRequest extends BaseProjectRequest {
+    view?: "full" | "compact";
+    page?: number;
+    pageSize?: number;
+    search?: string;
+}
 export type CrudEntriesResult = {
     status: 200;
     body: Entry[];
@@ -237,9 +246,55 @@ export type CrudEntriesResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export type EvalIndex = "dialogue" | "alignment" | "personalization" | "implementation" | "operational" | "lene";
+export interface EvalsRequest extends BaseProjectRequest {
+    globalId?: string;
+    index: EvalIndex;
+    startDate: string;
+    endDate: string;
+}
+export interface EvalsRange {
+    startAt?: string;
+    endBefore?: string;
+    points?: number;
+}
+export interface EvalsSeriesPoint {
+    date?: string;
+    score?: number | null;
+}
+export interface EvalsResponse {
+    range: EvalsRange;
+    series: EvalsSeriesPoint[];
+}
+export type CrudEvalsResult = {
+    status: 200;
+    body: EvalsResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export type CrudMatricesResult = {
     status: 200;
     body: Matrix[];
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
+export interface MatrixRequest extends BaseProjectRequest {
+    path: string;
+}
+export type CrudMatrixResult = {
+    status: 200;
+    body: Matrix | null;
 } | {
     status: 401;
     body: UnauthorizedResponse;
@@ -277,7 +332,7 @@ export type CrudSetArtifactResult = {
     status: 500;
     body: ServerErrorResponse;
 };
-export interface SetMatrixRequest extends BaseProjectRequest {
+export interface SetMatrixRequest extends BaseProjectRequest, OptionalUserRequest {
     path: string;
     structure: JsonObject | JsonArray | string;
 }
@@ -294,13 +349,39 @@ export type CrudSetMatrixResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface MatrixSlotDescription {
+    key: string;
+    value: string;
+}
+export type MatrixSlotDescriptionMap = Record<string, string>;
+export interface SetMatrixSecondPassRequest extends BaseProjectRequest, OptionalUserRequest {
+    path: string;
+    response?: MatrixSlotDescription[] | MatrixSlotDescriptionMap | string;
+    summary?: string;
+    locked?: 0 | 1;
+}
+export interface SetMatrixSecondPassResponse {
+    message: string;
+}
+export type CrudSetMatrixSecondPassResult = {
+    status: 200;
+    body: SetMatrixSecondPassResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export type EntrySyncContent = JsonObject | JsonArray | string;
 export interface EntrySyncInput {
     id: string;
     category: string;
     title: string;
     content: EntrySyncContent;
-    [key: string]: unknown;
 }
 export interface SyncEntriesRequest extends BaseProjectRequest {
     entries: EntrySyncInput[];
@@ -332,9 +413,22 @@ export type CrudSyncEntryResult = {
     status: 500;
     body: ServerErrorResponse;
 };
-export interface GlobalToneOfVoiceRequest extends BaseProjectRequest {
+export interface GlobalToneOfVoiceRequest extends BaseProjectRequest, OptionalUserRequest {
     toneOfVoice: string;
 }
+export interface GlobalToneOfVoiceResponse {
+    toneOfVoice?: string | null;
+}
+export type CrudGlobalToneOfVoiceGetResult = {
+    status: 200;
+    body: GlobalToneOfVoiceResponse | null;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export type CrudGlobalToneOfVoiceResult = {
     status: 200;
     body: MessageResponse;
@@ -358,6 +452,43 @@ export type CrudUserJourneysGetResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface UserJourneyRequest extends BaseProjectRequest {
+    name: string;
+}
+export type CrudUserJourneyGetResult = {
+    status: 200;
+    body: UserJourneyRecord | null;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
+export interface PatchUserJourneyRequest extends BaseProjectRequest, OptionalUserRequest {
+    name: string;
+    parent?: string | null;
+    description?: string;
+    toneOfVoice?: string;
+    userNeeds?: string | null;
+    businessGoals?: string | null;
+}
+export type CrudUserJourneyPatchResult = {
+    status: 200;
+    body: MessageResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 404;
+    body: ErrorResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export interface UserJourneyInput {
     name: string;
     parent?: string | null;
@@ -366,7 +497,7 @@ export interface UserJourneyInput {
     userNeeds?: string | null;
     businessGoals?: string | null;
 }
-export interface SetUserJourneysRequest extends BaseProjectRequest {
+export interface SetUserJourneysRequest extends BaseProjectRequest, OptionalUserRequest {
     userJourneys: UserJourneyInput[];
 }
 export type CrudUserJourneysSetResult = {
@@ -379,8 +510,58 @@ export type CrudUserJourneysSetResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface RevisionItem {
+    revisionId: number;
+    source: string;
+    createdAt: string;
+    userId?: string;
+}
+export interface RevisionsRequest extends BaseProjectRequest {
+    page?: number;
+    pageSize?: number;
+}
+export interface RevisionsResponse {
+    items: RevisionItem[];
+    page: number;
+    pageSize: number;
+    total: number;
+}
+export type CrudRevisionsResult = {
+    status: 200;
+    body: RevisionsResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
+export interface RollbackRevisionRequest extends BaseProjectRequest, OptionalUserRequest {
+    revisionId: number;
+}
+export interface RollbackRevisionResponse {
+    message: string;
+    revisionId: number;
+    rolledBackToRevisionId: number;
+}
+export type CrudRevisionsRollbackResult = {
+    status: 200;
+    body: RollbackRevisionResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 404;
+    body: ErrorResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export interface UsageResponse {
-    usage: number;
+    usage?: number;
 }
 export type CrudUsageResult = {
     status: 200;
@@ -397,7 +578,8 @@ export interface CredentialsRequest {
     regenerate?: boolean;
 }
 export interface CredentialsResponse {
-    projectId: string;
+    organizationId: string;
+    projectId?: string;
     apiKey: string | null;
     regenerated: boolean;
     message?: string;
@@ -493,9 +675,19 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/crud/entries";
         readonly auth: "apiKey";
     };
+    readonly crudEvals: {
+        readonly method: "GET";
+        readonly path: "/crud/evals";
+        readonly auth: "apiKey";
+    };
     readonly crudMatrices: {
         readonly method: "GET";
         readonly path: "/crud/matrices";
+        readonly auth: "apiKey";
+    };
+    readonly crudMatrix: {
+        readonly method: "GET";
+        readonly path: "/crud/matrix";
         readonly auth: "apiKey";
     };
     readonly crudRetrieveEntries: {
@@ -513,6 +705,11 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/crud/setMatrix";
         readonly auth: "apiKey";
     };
+    readonly crudSetMatrixSecondPass: {
+        readonly method: "POST";
+        readonly path: "/crud/setMatrixSecondPass";
+        readonly auth: "apiKey";
+    };
     readonly crudSyncEntries: {
         readonly method: "POST";
         readonly path: "/crud/syncEntries";
@@ -521,6 +718,11 @@ export declare const NXTL_ENDPOINTS: {
     readonly crudSyncEntry: {
         readonly method: "POST";
         readonly path: "/crud/syncEntry";
+        readonly auth: "apiKey";
+    };
+    readonly crudGlobalToneOfVoiceGet: {
+        readonly method: "GET";
+        readonly path: "/crud/globalToneOfVoice";
         readonly auth: "apiKey";
     };
     readonly crudGlobalToneOfVoice: {
@@ -533,9 +735,29 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/crud/userJourneys";
         readonly auth: "apiKey";
     };
+    readonly crudUserJourneyGet: {
+        readonly method: "GET";
+        readonly path: "/crud/userJourney";
+        readonly auth: "apiKey";
+    };
+    readonly crudUserJourneyPatch: {
+        readonly method: "PATCH";
+        readonly path: "/crud/userJourney";
+        readonly auth: "apiKey";
+    };
     readonly crudUserJourneysSet: {
         readonly method: "POST";
         readonly path: "/crud/userJourneys";
+        readonly auth: "apiKey";
+    };
+    readonly crudRevisions: {
+        readonly method: "GET";
+        readonly path: "/crud/revisions";
+        readonly auth: "apiKey";
+    };
+    readonly crudRevisionsRollback: {
+        readonly method: "POST";
+        readonly path: "/crud/revisions/rollback";
         readonly auth: "apiKey";
     };
     readonly crudUsage: {
@@ -562,21 +784,29 @@ export interface NxtlApiContracts {
     conversation: EndpointContract<ConversationRequest, ConversationResult>;
     reranking: EndpointContract<RerankingRequest, RerankingResult>;
     transformation: EndpointContract<TransformationRequest, TransformationResult>;
-    crudArtifacts: EndpointContract<GetProjectRequest, CrudArtifactsResult>;
+    crudArtifacts: EndpointContract<ArtifactListRequest, CrudArtifactsResult>;
     crudDeleteEntry: EndpointContract<DeleteEntryRequest, CrudDeleteEntryResult>;
     crudDeleteMatrix: EndpointContract<DeleteMatrixRequest, CrudDeleteMatrixResult>;
     crudDeleteUserJourney: EndpointContract<DeleteUserJourneyRequest, CrudDeleteUserJourneyResult>;
-    crudEntries: EndpointContract<GetProjectRequest, CrudEntriesResult>;
-    crudMatrices: EndpointContract<GetProjectRequest, CrudMatricesResult>;
+    crudEntries: EndpointContract<EntryListRequest, CrudEntriesResult>;
+    crudEvals: EndpointContract<EvalsRequest, CrudEvalsResult>;
+    crudMatrices: EndpointContract<BaseProjectRequest, CrudMatricesResult>;
+    crudMatrix: EndpointContract<MatrixRequest, CrudMatrixResult>;
     crudRetrieveEntries: EndpointContract<RetrieveEntriesRequest, CrudRetrieveEntriesResult>;
     crudSetArtifact: EndpointContract<SetArtifactRequest, CrudSetArtifactResult>;
     crudSetMatrix: EndpointContract<SetMatrixRequest, CrudSetMatrixResult>;
+    crudSetMatrixSecondPass: EndpointContract<SetMatrixSecondPassRequest, CrudSetMatrixSecondPassResult>;
     crudSyncEntries: EndpointContract<SyncEntriesRequest, CrudSyncEntriesResult>;
     crudSyncEntry: EndpointContract<SyncEntryRequest, CrudSyncEntryResult>;
+    crudGlobalToneOfVoiceGet: EndpointContract<BaseProjectRequest, CrudGlobalToneOfVoiceGetResult>;
     crudGlobalToneOfVoice: EndpointContract<GlobalToneOfVoiceRequest, CrudGlobalToneOfVoiceResult>;
     crudUserJourneysGet: EndpointContract<UserJourneysGetRequest, CrudUserJourneysGetResult>;
+    crudUserJourneyGet: EndpointContract<UserJourneyRequest, CrudUserJourneyGetResult>;
+    crudUserJourneyPatch: EndpointContract<PatchUserJourneyRequest, CrudUserJourneyPatchResult>;
     crudUserJourneysSet: EndpointContract<SetUserJourneysRequest, CrudUserJourneysSetResult>;
-    crudUsage: EndpointContract<GetProjectRequest, CrudUsageResult>;
+    crudRevisions: EndpointContract<RevisionsRequest, CrudRevisionsResult>;
+    crudRevisionsRollback: EndpointContract<RollbackRevisionRequest, CrudRevisionsRollbackResult>;
+    crudUsage: EndpointContract<BaseProjectRequest, CrudUsageResult>;
     crudCredentials: EndpointContract<CredentialsRequest, CrudCredentialsResult>;
     proxyChatCompletions: EndpointContract<ChatCompletionsRequest, ProxyChatCompletionsResult>;
 }
