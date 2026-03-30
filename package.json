@@ -1,0 +1,19 @@
+{
+  "name": "nxtl-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript contracts for all NXTL API endpoints.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
