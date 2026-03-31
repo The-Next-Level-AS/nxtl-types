@@ -309,6 +309,36 @@ export type CrudCitationsResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface ArtifactStatisticsRequest extends BaseProjectRequest {
+    formula: string;
+}
+export interface ArtifactStatisticsPoint {
+    formula: string;
+    citedAt: string;
+    hits: number;
+}
+export interface ArtifactStatisticsRange {
+    startAt: string;
+    endBefore: string;
+    points: number;
+}
+export interface ArtifactStatisticsResponse {
+    range: ArtifactStatisticsRange;
+    series: ArtifactStatisticsPoint[];
+}
+export type CrudArtifactStatisticsResult = {
+    status: 200;
+    body: ArtifactStatisticsResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export type CrudMatricesResult = {
     status: 200;
     body: Matrix[];
@@ -716,6 +746,11 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/crud/citations";
         readonly auth: "apiKey";
     };
+    readonly crudArtifactStatistics: {
+        readonly method: "GET";
+        readonly path: "/crud/artifactStatistics";
+        readonly auth: "apiKey";
+    };
     readonly crudMatrices: {
         readonly method: "GET";
         readonly path: "/crud/matrices";
@@ -827,6 +862,7 @@ export interface NxtlApiContracts {
     crudEntries: EndpointContract<EntryListRequest, CrudEntriesResult>;
     crudEvals: EndpointContract<EvalsRequest, CrudEvalsResult>;
     crudCitations: EndpointContract<CitationsRequest, CrudCitationsResult>;
+    crudArtifactStatistics: EndpointContract<ArtifactStatisticsRequest, CrudArtifactStatisticsResult>;
     crudMatrices: EndpointContract<BaseProjectRequest, CrudMatricesResult>;
     crudMatrix: EndpointContract<MatrixRequest, CrudMatrixResult>;
     crudRetrieveEntries: EndpointContract<RetrieveEntriesRequest, CrudRetrieveEntriesResult>;
