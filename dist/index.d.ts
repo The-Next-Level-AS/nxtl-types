@@ -514,6 +514,7 @@ export interface RevisionItem {
     revisionId: number;
     source: string;
     createdAt: string;
+    snapshot: JsonObject;
     userId?: string;
 }
 export interface RevisionsRequest extends BaseProjectRequest {

@@ -477,6 +477,7 @@ export interface RevisionItem {
   revisionId: number;
   source: string;
   createdAt: string;
+  snapshot: JsonObject;
   userId?: string;
 }
 
