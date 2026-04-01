@@ -1,6 +1,6 @@
 {
   "name": "@nxtl/nxtl-types",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "TypeScript contracts for all NXTL API endpoints.",
   "type": "module",
   "main": "dist/index.js",
