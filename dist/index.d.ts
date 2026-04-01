@@ -574,7 +574,6 @@ export interface RevisionItem {
     revisionId: number;
     source: string;
     createdAt: string;
-    snapshot: JsonObject;
     userId?: string;
 }
 export interface RevisionsRequest extends BaseProjectRequest {
@@ -593,6 +592,32 @@ export type CrudRevisionsResult = {
 } | {
     status: 401;
     body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
+export interface RevisionRequest extends BaseProjectRequest {
+    revisionId: number;
+}
+export interface RevisionResponse {
+    revisionId: number;
+    source: string;
+    createdAt: string;
+    snapshot: JsonObject;
+    userId?: string;
+}
+export type CrudRevisionResult = {
+    status: 200;
+    body: RevisionResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 404;
+    body: ErrorResponse;
 } | {
     status: 500;
     body: ServerErrorResponse;
@@ -826,6 +851,11 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/crud/revisions";
         readonly auth: "apiKey";
     };
+    readonly crudRevision: {
+        readonly method: "GET";
+        readonly path: "/crud/revision";
+        readonly auth: "apiKey";
+    };
     readonly crudRevisionsRollback: {
         readonly method: "POST";
         readonly path: "/crud/revisions/rollback";
@@ -878,6 +908,7 @@ export interface NxtlApiContracts {
     crudUserJourneyPatch: EndpointContract<PatchUserJourneyRequest, CrudUserJourneyPatchResult>;
     crudUserJourneysSet: EndpointContract<SetUserJourneysRequest, CrudUserJourneysSetResult>;
     crudRevisions: EndpointContract<RevisionsRequest, CrudRevisionsResult>;
+    crudRevision: EndpointContract<RevisionRequest, CrudRevisionResult>;
     crudRevisionsRollback: EndpointContract<RollbackRevisionRequest, CrudRevisionsRollbackResult>;
     crudUsage: EndpointContract<BaseProjectRequest, CrudUsageResult>;
     crudCredentials: EndpointContract<CredentialsRequest, CrudCredentialsResult>;
