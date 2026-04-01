@@ -65,6 +65,12 @@ export interface UserJourneyRecord {
   businessGoals?: string | null;
 }
 
+export interface UserJourneyChild extends UserJourneyRecord {}
+
+export interface UserJourneyResponse extends UserJourneyRecord {
+  children?: UserJourneyChild[];
+}
+
 export interface ConversationRequest extends BaseProjectRequest {
   history: string;
   episode: string;
@@ -485,7 +491,7 @@ export interface UserJourneyRequest extends BaseProjectRequest {
 }
 
 export type CrudUserJourneyGetResult =
-  | { status: 200; body: UserJourneyRecord | null }
+  | { status: 200; body: UserJourneyResponse | null }
   | { status: 401; body: UnauthorizedResponse }
   | { status: 500; body: ServerErrorResponse };
 
