@@ -665,7 +665,6 @@ export type CrudUsageResult = {
     body: ServerErrorResponse;
 };
 export interface CredentialsRequest {
-    userId: string;
     regenerate?: boolean;
 }
 export interface CredentialsResponse {
