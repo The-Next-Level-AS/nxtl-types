@@ -196,6 +196,20 @@ export type CrudArtifactsResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface ActivatedPluginRecord {
+    pluginName: string;
+    activatedAt: string;
+}
+export type CrudActivatedPluginsResult = {
+    status: 200;
+    body: ActivatedPluginRecord[];
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export interface DeleteEntryRequest extends BaseProjectRequest {
     id: string;
 }
@@ -575,6 +589,26 @@ export type CrudUserJourneysSetResult = {
     status: 500;
     body: ServerErrorResponse;
 };
+export interface RegisterPluginActivationRequest extends BaseProjectRequest {
+    pluginName: string;
+}
+export interface RegisterPluginActivationResponse {
+    message: string;
+    pluginName: string;
+}
+export type CrudRegisterPluginActivationResult = {
+    status: 200;
+    body: RegisterPluginActivationResponse;
+} | {
+    status: 400;
+    body: ErrorResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export interface RevisionItem {
     revisionId: number;
     source: string;
@@ -740,6 +774,11 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/transformation";
         readonly auth: "apiKey";
     };
+    readonly crudActivatedPlugins: {
+        readonly method: "GET";
+        readonly path: "/crud/activatedPlugins";
+        readonly auth: "apiKey";
+    };
     readonly crudArtifacts: {
         readonly method: "GET";
         readonly path: "/crud/artifacts";
@@ -850,6 +889,11 @@ export declare const NXTL_ENDPOINTS: {
         readonly path: "/crud/userJourneys";
         readonly auth: "apiKey";
     };
+    readonly crudRegisterPluginActivation: {
+        readonly method: "POST";
+        readonly path: "/crud/registerPluginActivation";
+        readonly auth: "apiKey";
+    };
     readonly crudRevisions: {
         readonly method: "GET";
         readonly path: "/crud/revisions";
@@ -889,6 +933,7 @@ export interface NxtlApiContracts {
     conversation: EndpointContract<ConversationRequest, ConversationResult>;
     reranking: EndpointContract<RerankingRequest, RerankingResult>;
     transformation: EndpointContract<TransformationRequest, TransformationResult>;
+    crudActivatedPlugins: EndpointContract<BaseProjectRequest, CrudActivatedPluginsResult>;
     crudArtifacts: EndpointContract<ArtifactListRequest, CrudArtifactsResult>;
     crudDeleteEntry: EndpointContract<DeleteEntryRequest, CrudDeleteEntryResult>;
     crudDeleteMatrix: EndpointContract<DeleteMatrixRequest, CrudDeleteMatrixResult>;
@@ -911,6 +956,7 @@ export interface NxtlApiContracts {
     crudUserJourneyGet: EndpointContract<UserJourneyRequest, CrudUserJourneyGetResult>;
     crudUserJourneyPatch: EndpointContract<PatchUserJourneyRequest, CrudUserJourneyPatchResult>;
     crudUserJourneysSet: EndpointContract<SetUserJourneysRequest, CrudUserJourneysSetResult>;
+    crudRegisterPluginActivation: EndpointContract<RegisterPluginActivationRequest, CrudRegisterPluginActivationResult>;
     crudRevisions: EndpointContract<RevisionsRequest, CrudRevisionsResult>;
     crudRevision: EndpointContract<RevisionRequest, CrudRevisionResult>;
     crudRevisionsRollback: EndpointContract<RollbackRevisionRequest, CrudRevisionsRollbackResult>;

@@ -218,6 +218,16 @@ export type CrudArtifactsResult =
   | { status: 401; body: UnauthorizedResponse }
   | { status: 500; body: ServerErrorResponse };
 
+export interface ActivatedPluginRecord {
+  pluginName: string;
+  activatedAt: string;
+}
+
+export type CrudActivatedPluginsResult =
+  | { status: 200; body: ActivatedPluginRecord[] }
+  | { status: 401; body: UnauthorizedResponse }
+  | { status: 500; body: ServerErrorResponse };
+
 export interface DeleteEntryRequest extends BaseProjectRequest {
   id: string;
 }
@@ -533,6 +543,21 @@ export type CrudUserJourneysSetResult =
   | { status: 401; body: UnauthorizedResponse }
   | { status: 500; body: ServerErrorResponse };
 
+export interface RegisterPluginActivationRequest extends BaseProjectRequest {
+  pluginName: string;
+}
+
+export interface RegisterPluginActivationResponse {
+  message: string;
+  pluginName: string;
+}
+
+export type CrudRegisterPluginActivationResult =
+  | { status: 200; body: RegisterPluginActivationResponse }
+  | { status: 400; body: ErrorResponse }
+  | { status: 401; body: UnauthorizedResponse }
+  | { status: 500; body: ServerErrorResponse };
+
 export interface RevisionItem {
   revisionId: number;
   source: string;
@@ -666,6 +691,11 @@ export const NXTL_ENDPOINTS = {
   conversation: { method: "POST", path: "/conversation", auth: "apiKey" },
   reranking: { method: "POST", path: "/reranking", auth: "apiKey" },
   transformation: { method: "POST", path: "/transformation", auth: "apiKey" },
+  crudActivatedPlugins: {
+    method: "GET",
+    path: "/crud/activatedPlugins",
+    auth: "apiKey",
+  },
   crudArtifacts: { method: "GET", path: "/crud/artifacts", auth: "apiKey" },
   crudDeleteEntry: {
     method: "DELETE",
@@ -744,6 +774,11 @@ export const NXTL_ENDPOINTS = {
     path: "/crud/userJourneys",
     auth: "apiKey",
   },
+  crudRegisterPluginActivation: {
+    method: "POST",
+    path: "/crud/registerPluginActivation",
+    auth: "apiKey",
+  },
   crudRevisions: { method: "GET", path: "/crud/revisions", auth: "apiKey" },
   crudRevision: { method: "GET", path: "/crud/revision", auth: "apiKey" },
   crudRevisionsRollback: {
@@ -780,6 +815,10 @@ export interface NxtlApiContracts {
   conversation: EndpointContract<ConversationRequest, ConversationResult>;
   reranking: EndpointContract<RerankingRequest, RerankingResult>;
   transformation: EndpointContract<TransformationRequest, TransformationResult>;
+  crudActivatedPlugins: EndpointContract<
+    BaseProjectRequest,
+    CrudActivatedPluginsResult
+  >;
   crudArtifacts: EndpointContract<ArtifactListRequest, CrudArtifactsResult>;
   crudDeleteEntry: EndpointContract<DeleteEntryRequest, CrudDeleteEntryResult>;
   crudDeleteMatrix: EndpointContract<DeleteMatrixRequest, CrudDeleteMatrixResult>;
@@ -831,6 +870,10 @@ export interface NxtlApiContracts {
   crudUserJourneysSet: EndpointContract<
     SetUserJourneysRequest,
     CrudUserJourneysSetResult
+  >;
+  crudRegisterPluginActivation: EndpointContract<
+    RegisterPluginActivationRequest,
+    CrudRegisterPluginActivationResult
   >;
   crudRevisions: EndpointContract<RevisionsRequest, CrudRevisionsResult>;
   crudRevision: EndpointContract<RevisionRequest, CrudRevisionResult>;
