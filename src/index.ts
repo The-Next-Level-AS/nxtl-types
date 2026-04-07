@@ -38,12 +38,17 @@ export interface Artifact {
     content: string;
     hash: string;
     createdAt: string;
+    lifetimeHits: number;
 }
 
 export interface Entry {
     id: string;
     summary?: string | null;
     full: string;
+}
+
+export interface CrudEntry extends Entry {
+    lifetimeCitations: number;
 }
 
 export interface RetrievedEntry extends Entry {
@@ -266,7 +271,7 @@ export interface EntryListRequest extends BaseProjectRequest {
 }
 
 export type CrudEntriesResult =
-    | { status: 200; body: Entry[] }
+    | { status: 200; body: CrudEntry[] }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 

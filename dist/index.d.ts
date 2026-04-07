@@ -29,11 +29,15 @@ export interface Artifact {
     content: string;
     hash: string;
     createdAt: string;
+    lifetimeHits: number;
 }
 export interface Entry {
     id: string;
     summary?: string | null;
     full: string;
+}
+export interface CrudEntry extends Entry {
+    lifetimeCitations: number;
 }
 export interface RetrievedEntry extends Entry {
     vec_sim: number;
@@ -260,7 +264,7 @@ export interface EntryListRequest extends BaseProjectRequest {
 }
 export type CrudEntriesResult = {
     status: 200;
-    body: Entry[];
+    body: CrudEntry[];
 } | {
     status: 401;
     body: UnauthorizedResponse;
