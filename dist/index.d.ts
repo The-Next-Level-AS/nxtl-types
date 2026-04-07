@@ -700,6 +700,7 @@ export type CrudUsageResult = {
 };
 export interface CredentialsRequest {
     regenerate?: boolean;
+    organizationId?: string;
 }
 export interface CredentialsResponse {
     organizationId: string;
