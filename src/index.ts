@@ -37,6 +37,7 @@ export interface Artifact {
     formula: string;
     content: string;
     hash: string;
+    createdAt: string;
 }
 
 export interface Entry {
@@ -209,6 +210,8 @@ export interface ArtifactListRequest extends BaseProjectRequest {
     page?: number;
     pageSize?: number;
     search?: string;
+    startDate?: string;
+    endDate?: string;
 }
 
 export interface GetProjectRequest extends BaseProjectRequest {}
