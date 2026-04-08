@@ -270,6 +270,15 @@ export interface EntryListRequest extends BaseProjectRequest {
     search?: string;
 }
 
+export interface EntryRequest extends BaseProjectRequest {
+    id: string;
+}
+
+export type CrudEntryResult =
+    | { status: 200; body: Entry | null }
+    | { status: 401; body: UnauthorizedResponse }
+    | { status: 500; body: ServerErrorResponse };
+
 export type CrudEntriesResult =
     | { status: 200; body: CrudEntry[] }
     | { status: 401; body: UnauthorizedResponse }
@@ -715,6 +724,7 @@ export const NXTL_ENDPOINTS = {
         path: "/crud/deleteUserJourney",
         auth: "apiKey",
     },
+    crudEntry: { method: "GET", path: "/crud/entry", auth: "apiKey" },
     crudEntries: { method: "GET", path: "/crud/entries", auth: "apiKey" },
     crudEvals: { method: "GET", path: "/crud/evals", auth: "apiKey" },
     crudCitations: { method: "GET", path: "/crud/citations", auth: "apiKey" },
@@ -838,6 +848,7 @@ export interface NxtlApiContracts {
         DeleteUserJourneyRequest,
         CrudDeleteUserJourneyResult
     >;
+    crudEntry: EndpointContract<EntryRequest, CrudEntryResult>;
     crudEntries: EndpointContract<EntryListRequest, CrudEntriesResult>;
     crudEvals: EndpointContract<EvalsRequest, CrudEvalsResult>;
     crudCitations: EndpointContract<CitationsRequest, CrudCitationsResult>;
