@@ -1,4 +1,21 @@
 export type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+export type * from "./plugins.js";
+export type * from "./admin.js";
+export type * from "./management.js";
+import type {
+    AssessmentRequest,
+    AssessmentsRequest,
+    CrudAssessmentPatchResult,
+    CrudAssessmentResult,
+    CrudAssessmentsResult,
+    CrudDomainModelGetResult,
+    CrudDomainModelResult,
+    CrudFallbackResponseGetResult,
+    CrudFallbackResponseResult,
+    DomainModelRequest,
+    FallbackResponseRequest,
+    PatchAssessmentRequest,
+} from "./management.js";
 export type AuthScheme = "apiKey" | "bearer" | "none";
 
 export type ServerErrorResponse = string;
@@ -29,6 +46,8 @@ export interface BaseProjectRequest {
     projectId?: string;
 }
 
+export type DataSource = "real" | "simulated";
+
 export interface OptionalUserRequest {
     userId?: string;
 }
@@ -39,6 +58,7 @@ export interface Artifact {
     hash: string;
     createdAt: string;
     lifetimeHits: number;
+    dataSource?: DataSource;
 }
 
 export interface Entry {
@@ -51,8 +71,15 @@ export interface CrudEntry extends Entry {
     lifetimeCitations: number;
 }
 
-export interface RetrievedEntry extends Entry {
+export interface RetrievedEntry {
+    id: string;
+    full: string;
     vec_sim: number;
+    keyword_score?: number;
+    lexical_score?: number;
+    lexical_matches?: number;
+    direct_support?: boolean;
+    retrieval_score?: number;
 }
 
 export interface Matrix {
@@ -82,10 +109,12 @@ export interface ConversationRequest extends BaseProjectRequest {
     episode: string;
     message: string;
     entryIds: string[];
+    language?: string;
+    dataSource?: DataSource;
     suggestions?: string[];
     startTimestamp?: number;
     tokenUsage?: number;
-    forceUserJourney?: string;
+    pattern?: string;
 }
 
 export type ConversationStream = string;
@@ -129,11 +158,30 @@ export type ConversationResult =
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
+export interface SuggestionsRequest extends BaseProjectRequest {
+    episode?: string;
+    language?: string;
+    dataSource?: DataSource;
+    startTimestamp?: number;
+    tokenUsage?: number;
+    pattern?: string;
+}
+
+export interface SuggestionsResponse {
+    suggestions: string[];
+    inference_id: string | null;
+    token_usage: number;
+}
+
+export type SuggestionsResult =
+    | { status: 200; body: SuggestionsResponse }
+    | { status: 401; body: UnauthorizedResponse }
+    | { status: 500; body: ServerErrorResponse };
+
 export interface RerankingEntryInput {
     id: string;
-    summary: string | null;
     full: string;
-    vec_sim: number;
+    vec_sim?: number;
 }
 
 export interface RerankingRequest extends BaseProjectRequest {
@@ -164,6 +212,7 @@ export interface TransformationRequest extends BaseProjectRequest {
     entryIds?: string[];
     episode?: string;
     history?: string;
+    dataSource?: DataSource;
 }
 
 export interface RewrittenContentItem {
@@ -186,7 +235,8 @@ export interface TransformationResponse {
     rewritten_content: RewrittenContentItem[];
     episode?: string;
     entry_ids: string[];
-    dead_end: boolean;
+    cache_hit: boolean;
+    data_source: DataSource;
     start_timestamp: number;
     token_usage: number;
     personalization_context: PersonalizationContext;
@@ -217,12 +267,14 @@ export interface ArtifactListRequest extends BaseProjectRequest {
     search?: string;
     startDate?: string;
     endDate?: string;
+    includeOutliers?: boolean;
 }
 
 export interface GetProjectRequest extends BaseProjectRequest {}
 
 export type CrudArtifactsResult =
     | { status: 200; body: Artifact[] }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
@@ -308,11 +360,13 @@ export interface EvalsRange {
 export interface EvalsSeriesPoint {
     date?: string;
     score?: number | null;
+    dataSource?: DataSource;
 }
 
 export interface EvalsResponse {
     range: EvalsRange;
     series: EvalsSeriesPoint[];
+    simulatedSeries?: EvalsSeriesPoint[];
 }
 
 export type CrudEvalsResult =
@@ -390,9 +444,10 @@ export type CrudMatrixResult =
     | { status: 500; body: ServerErrorResponse };
 
 export interface RetrieveEntriesRequest extends BaseProjectRequest {
-    dataSource: string;
     query: string[];
     results?: number;
+    episode?: string;
+    category?: string;
 }
 
 export type CrudRetrieveEntriesResult =
@@ -412,7 +467,8 @@ export type CrudSetArtifactResult =
     | { status: 500; body: ServerErrorResponse };
 
 export interface SetMatrixRequest
-    extends BaseProjectRequest, OptionalUserRequest {
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     path: string;
     structure: JsonObject | JsonArray | string;
 }
@@ -434,7 +490,8 @@ export interface MatrixSlotDescription {
 export type MatrixSlotDescriptionMap = Record<string, string>;
 
 export interface SetMatrixSecondPassRequest
-    extends BaseProjectRequest, OptionalUserRequest {
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     path: string;
     response?: MatrixSlotDescription[] | MatrixSlotDescriptionMap | string;
     summary?: string;
@@ -468,6 +525,7 @@ export interface SyncEntriesRequest extends BaseProjectRequest {
 
 export type CrudSyncEntriesResult =
     | { status: 200; body: MessageResponse }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
@@ -479,11 +537,13 @@ export interface SyncEntryRequest extends BaseProjectRequest {
 
 export type CrudSyncEntryResult =
     | { status: 200; body: MessageResponse }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
 export interface GlobalToneOfVoiceRequest
-    extends BaseProjectRequest, OptionalUserRequest {
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     toneOfVoice: string;
 }
 
@@ -520,7 +580,8 @@ export type CrudUserJourneyGetResult =
     | { status: 500; body: ServerErrorResponse };
 
 export interface PatchUserJourneyRequest
-    extends BaseProjectRequest, OptionalUserRequest {
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     name: string;
     parent?: string | null;
     description?: string;
@@ -546,7 +607,8 @@ export interface UserJourneyInput {
 }
 
 export interface SetUserJourneysRequest
-    extends BaseProjectRequest, OptionalUserRequest {
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     userJourneys: UserJourneyInput[];
 }
 
@@ -614,7 +676,8 @@ export type CrudRevisionResult =
     | { status: 500; body: ServerErrorResponse };
 
 export interface RollbackRevisionRequest
-    extends BaseProjectRequest, OptionalUserRequest {
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     revisionId: number;
 }
 
@@ -701,6 +764,8 @@ export type ProxyChatCompletionsResult =
 
 export const NXTL_ENDPOINTS = {
     conversation: { method: "POST", path: "/conversation", auth: "apiKey" },
+    suggestions: { method: "POST", path: "/suggestions", auth: "apiKey" },
+    /** @deprecated Legacy plugin endpoint; absent from the current backend. */
     reranking: { method: "POST", path: "/reranking", auth: "apiKey" },
     transformation: { method: "POST", path: "/transformation", auth: "apiKey" },
     crudActivatedPlugins: {
@@ -727,6 +792,17 @@ export const NXTL_ENDPOINTS = {
     crudEntry: { method: "GET", path: "/crud/entry", auth: "apiKey" },
     crudEntries: { method: "GET", path: "/crud/entries", auth: "apiKey" },
     crudEvals: { method: "GET", path: "/crud/evals", auth: "apiKey" },
+    crudAssessments: {
+        method: "GET",
+        path: "/crud/assessments",
+        auth: "apiKey",
+    },
+    crudAssessment: { method: "GET", path: "/crud/assessment", auth: "apiKey" },
+    crudAssessmentPatch: {
+        method: "PATCH",
+        path: "/crud/assessment",
+        auth: "apiKey",
+    },
     crudCitations: { method: "GET", path: "/crud/citations", auth: "apiKey" },
     crudArtifactStatistics: {
         method: "GET",
@@ -765,6 +841,26 @@ export const NXTL_ENDPOINTS = {
     crudGlobalToneOfVoice: {
         method: "POST",
         path: "/crud/globalToneOfVoice",
+        auth: "apiKey",
+    },
+    crudDomainModelGet: {
+        method: "GET",
+        path: "/crud/domainModel",
+        auth: "apiKey",
+    },
+    crudDomainModel: {
+        method: "POST",
+        path: "/crud/domainModel",
+        auth: "apiKey",
+    },
+    crudFallbackResponseGet: {
+        method: "GET",
+        path: "/crud/fallbackResponse",
+        auth: "apiKey",
+    },
+    crudFallbackResponse: {
+        method: "POST",
+        path: "/crud/fallbackResponse",
         auth: "apiKey",
     },
     crudUserJourneysGet: {
@@ -811,7 +907,7 @@ export const NXTL_ENDPOINTS = {
         auth: "none",
     },
 } as const satisfies Record<
-    string,
+    keyof NxtlApiContracts,
     {
         method: HttpMethod;
         path: string;
@@ -826,6 +922,8 @@ export interface EndpointContract<Request, Result> {
 
 export interface NxtlApiContracts {
     conversation: EndpointContract<ConversationRequest, ConversationResult>;
+    suggestions: EndpointContract<SuggestionsRequest, SuggestionsResult>;
+    /** @deprecated Legacy plugin endpoint; absent from the current backend. */
     reranking: EndpointContract<RerankingRequest, RerankingResult>;
     transformation: EndpointContract<
         TransformationRequest,
@@ -851,6 +949,15 @@ export interface NxtlApiContracts {
     crudEntry: EndpointContract<EntryRequest, CrudEntryResult>;
     crudEntries: EndpointContract<EntryListRequest, CrudEntriesResult>;
     crudEvals: EndpointContract<EvalsRequest, CrudEvalsResult>;
+    crudAssessments: EndpointContract<
+        AssessmentsRequest,
+        CrudAssessmentsResult
+    >;
+    crudAssessment: EndpointContract<AssessmentRequest, CrudAssessmentResult>;
+    crudAssessmentPatch: EndpointContract<
+        PatchAssessmentRequest,
+        CrudAssessmentPatchResult
+    >;
     crudCitations: EndpointContract<CitationsRequest, CrudCitationsResult>;
     crudArtifactStatistics: EndpointContract<
         ArtifactStatisticsRequest,
@@ -883,6 +990,22 @@ export interface NxtlApiContracts {
     crudGlobalToneOfVoice: EndpointContract<
         GlobalToneOfVoiceRequest,
         CrudGlobalToneOfVoiceResult
+    >;
+    crudDomainModelGet: EndpointContract<
+        BaseProjectRequest,
+        CrudDomainModelGetResult
+    >;
+    crudDomainModel: EndpointContract<
+        DomainModelRequest,
+        CrudDomainModelResult
+    >;
+    crudFallbackResponseGet: EndpointContract<
+        BaseProjectRequest,
+        CrudFallbackResponseGetResult
+    >;
+    crudFallbackResponse: EndpointContract<
+        FallbackResponseRequest,
+        CrudFallbackResponseResult
     >;
     crudUserJourneysGet: EndpointContract<
         UserJourneysGetRequest,
