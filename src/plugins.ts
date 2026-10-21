@@ -7,7 +7,11 @@
  * Sync status models also represent the in-process plugin domain; their Dates
  * and Errors are serialized by the framework when sent over HTTP.
  */
-import type { EntrySyncInput, MessageResponse } from "./index.js";
+import type {
+    EntrySyncInput,
+    MessageResponse,
+    UserJourneyRecord,
+} from "./index.js";
 
 /** CMS content accepted by the plugin adapter before normalization to EntrySyncInput. */
 export interface PluginContentPayload extends Omit<EntrySyncInput, "content"> {
@@ -201,20 +205,14 @@ export interface PluginVectorSearchResponse {
 }
 
 /**
- * User Journey definition
+ * Core journey with optional CMS metadata and legacy input aliases.
  */
-export interface PluginUserJourney {
-    /** Unique journey name (e.g., 'enterprise-demo', 'first-time-visitor') */
-    name: string;
+export interface PluginUserJourney extends UserJourneyRecord {
+    /** @deprecated Normalize legacy CMS inputs to toneOfVoice before syncing. */
+    toneofvoice?: string | null;
 
-    /** Description of the user scenario for vector search context */
-    description: string;
-
-    /** Tone of voice for content presentation */
-    toneofvoice?: string;
-
-    /** NXTL project ID - required when syncing to API */
-    projectid?: string;
+    /** @deprecated Scope API requests using organizationId/projectId. */
+    projectid?: string | null;
 
     /** Sanity internal key - required for array items, not sent to API */
     _key?: string;
@@ -231,19 +229,7 @@ export interface PluginSyncUserJourneysRequest {
 /**
  * Sync user journeys response
  */
-export interface PluginSyncUserJourneysResponse {
-    /** Success status */
-    success: boolean;
-
-    /** Number of journeys synced */
-    count: number;
-
-    /** Sync timestamp */
-    syncedAt: string;
-
-    /** Optional message */
-    message?: string;
-}
+export type PluginSyncUserJourneysResponse = MessageResponse;
 
 /**
  * Get all user journeys response
@@ -438,19 +424,15 @@ export interface PluginBridgeEntriesRequest {
 /**
  * User journey metadata
  */
-export interface PluginBridgeUserJourney {
-    /** Journey ID */
-    id: string;
-    /** Journey name */
-    name: string;
-    /** Journey description */
-    description?: string;
+export interface PluginBridgeUserJourney extends UserJourneyRecord {
+    /** Optional bridge identifier; the canonical journey ID is name. */
+    id?: string;
     /** Campaign associations */
     campaigns?: string[];
     /** Creation timestamp */
-    createdAt: string;
+    createdAt?: string;
     /** Last updated timestamp */
-    updatedAt: string;
+    updatedAt?: string;
 }
 
 /**

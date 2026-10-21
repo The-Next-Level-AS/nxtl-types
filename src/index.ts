@@ -90,12 +90,16 @@ export interface Matrix {
 }
 
 export interface UserJourneyRecord {
+    /** Stable Core journey ID, scoped by the request's organization/project. */
     name: string;
-    parent?: string | null;
-    description?: string | null;
-    toneOfVoice?: string | null;
-    userNeeds?: string | null;
-    businessGoals?: string | null;
+    /** Human-readable persona or user-need label. */
+    title: string;
+    /** Persona ID for a child need; null for a persona or the uj0 fallback. */
+    parent: string | null;
+    /** Exact child need; null on personas, or "placeholder" on uj0. */
+    description: string | null;
+    /** Stored persona/fallback tone; null on children, which inherit it. */
+    toneOfVoice: string | null;
 }
 
 export interface UserJourneyChild extends UserJourneyRecord {}
@@ -306,14 +310,17 @@ export type CrudDeleteMatrixResult =
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
-export interface DeleteUserJourneyRequest extends BaseProjectRequest {
+export interface DeleteUserJourneyRequest
+    extends BaseProjectRequest,
+        OptionalUserRequest {
     name: string;
 }
 
 export type CrudDeleteUserJourneyResult =
     | { status: 200; body: MessageResponse }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
-    | { status: 500; body: ServerErrorResponse };
+    | { status: 500; body: ErrorResponse | ServerErrorResponse };
 
 export interface EntryListRequest extends BaseProjectRequest {
     view?: "full" | "compact";
@@ -567,6 +574,7 @@ export interface UserJourneysGetRequest extends BaseProjectRequest {
 
 export type CrudUserJourneysGetResult =
     | { status: 200; body: UserJourneyRecord[] }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
@@ -576,6 +584,7 @@ export interface UserJourneyRequest extends BaseProjectRequest {
 
 export type CrudUserJourneyGetResult =
     | { status: 200; body: UserJourneyResponse | null }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 500; body: ServerErrorResponse };
 
@@ -583,11 +592,10 @@ export interface PatchUserJourneyRequest
     extends BaseProjectRequest,
         OptionalUserRequest {
     name: string;
+    title?: string;
     parent?: string | null;
-    description?: string;
-    toneOfVoice?: string;
-    userNeeds?: string | null;
-    businessGoals?: string | null;
+    description?: string | null;
+    toneOfVoice?: string | null;
 }
 
 export type CrudUserJourneyPatchResult =
@@ -595,16 +603,10 @@ export type CrudUserJourneyPatchResult =
     | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
     | { status: 404; body: ErrorResponse }
-    | { status: 500; body: ServerErrorResponse };
+    | { status: 500; body: ErrorResponse | ServerErrorResponse };
 
-export interface UserJourneyInput {
-    name: string;
-    parent?: string | null;
-    description: string;
-    toneOfVoice: string;
-    userNeeds?: string | null;
-    businessGoals?: string | null;
-}
+/** Complete record for a catalog upsert; omitted records are not deleted. */
+export interface UserJourneyInput extends UserJourneyRecord {}
 
 export interface SetUserJourneysRequest
     extends BaseProjectRequest,
@@ -614,8 +616,9 @@ export interface SetUserJourneysRequest
 
 export type CrudUserJourneysSetResult =
     | { status: 200; body: MessageResponse }
+    | { status: 400; body: ErrorResponse }
     | { status: 401; body: UnauthorizedResponse }
-    | { status: 500; body: ServerErrorResponse };
+    | { status: 500; body: ErrorResponse | ServerErrorResponse };
 
 export interface RegisterPluginActivationRequest extends BaseProjectRequest {
     pluginName: string;
@@ -636,6 +639,8 @@ export interface RevisionItem {
     revisionId: number;
     source: string;
     createdAt: string;
+    /** False for snapshots created before the Core journey migration. */
+    canRollback: boolean;
     userId?: string;
 }
 
@@ -664,6 +669,7 @@ export interface RevisionResponse {
     revisionId: number;
     source: string;
     createdAt: string;
+    canRollback: boolean;
     snapshot: JsonObject;
     userId?: string;
 }

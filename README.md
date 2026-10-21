@@ -49,6 +49,27 @@ update the corresponding request, response, result union, and `NXTL_ENDPOINTS`
 entry together. Consumer-specific normalized models must be named separately
 from raw API responses.
 
+## Core user journeys (0.2.0)
+
+Journey CRUD contracts now represent the Core catalog. Every record contains
+`name` (the stable journey ID), `title`, `parent`, `description`, and
+`toneOfVoice`. The request's `organizationId`/`projectId` supplies tenant scope.
+Persona roots have `parent: null`, `description: null`, and their stored tone.
+Children have a persona ID in `parent`, their exact user need in `description`,
+and `toneOfVoice: null` to inherit the persona's tone. The childless `uj0`
+fallback keeps `description: "placeholder"`.
+
+`UserJourneyInput` requires a complete record for upsert. PATCH fields are
+optional; explicit `null` clears a nullable field, while omission preserves it.
+The backend validates the resulting catalog, including root-only parents and
+nonempty child needs. Omitted records in a batch upsert are not deleted.
+`userNeeds` and `businessGoals` are no longer catalog fields. Runtime and
+historical evaluation payloads may retain their separately adapted shapes.
+
+Plugin journey and bridge types share the same catalog fields; CMS `_key` and
+optional bridge metadata are adapter-only. Legacy lowercase `toneofvoice` and
+`projectid` are deprecated input aliases and must be normalized before syncing.
+
 ## Verify and release
 
 ```bash
