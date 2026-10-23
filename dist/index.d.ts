@@ -78,9 +78,26 @@ export interface UserJourneyChild extends UserJourneyRecord {
 export interface UserJourneyResponse extends UserJourneyRecord {
     children?: UserJourneyChild[];
 }
+/** Initialize once, then reuse the returned episode for every conversation call. */
+export interface EpisodeRequest extends BaseProjectRequest {
+}
+export interface EpisodeResponse {
+    episode: string;
+}
+export type EpisodeResult = {
+    status: 200;
+    body: EpisodeResponse;
+} | {
+    status: 401;
+    body: UnauthorizedResponse;
+} | {
+    status: 500;
+    body: ServerErrorResponse;
+};
 export interface ConversationRequest extends BaseProjectRequest {
     history: string;
-    episode: string;
+    /** Reuse a server-issued episode; an omitted ID is returned in X-Episode-ID. */
+    episode?: string;
     message: string;
     entryIds: string[];
     language?: string;
@@ -94,6 +111,7 @@ export type ConversationStream = string;
 export interface ConversationSuccessHeaders {
     "Cache-Control": string;
     Connection: string;
+    "X-Episode-ID": string;
 }
 export type ConversationControlTag = "MESSAGE" | "HANDOFF";
 export interface ConversationControlFrame {
@@ -132,6 +150,7 @@ export interface SuggestionsRequest extends BaseProjectRequest {
     pattern?: string;
 }
 export interface SuggestionsResponse {
+    episode: string;
     suggestions: string[];
     inference_id: string | null;
     token_usage: number;
@@ -198,7 +217,7 @@ export interface PersonalizationContext {
 }
 export interface TransformationResponse {
     rewritten_content: RewrittenContentItem[];
-    episode?: string;
+    episode: string;
     entry_ids: string[];
     cache_hit: boolean;
     data_source: DataSource;
@@ -845,6 +864,11 @@ export type ProxyChatCompletionsResult = {
     body: ServerErrorResponse;
 };
 export declare const NXTL_ENDPOINTS: {
+    readonly episode: {
+        readonly method: "POST";
+        readonly path: "/episode";
+        readonly auth: "apiKey";
+    };
     readonly conversation: {
         readonly method: "POST";
         readonly path: "/conversation";
@@ -1062,6 +1086,7 @@ export interface EndpointContract<Request, Result> {
     result: Result;
 }
 export interface NxtlApiContracts {
+    episode: EndpointContract<EpisodeRequest, EpisodeResult>;
     conversation: EndpointContract<ConversationRequest, ConversationResult>;
     suggestions: EndpointContract<SuggestionsRequest, SuggestionsResult>;
     /** @deprecated Legacy plugin endpoint; absent from the current backend. */

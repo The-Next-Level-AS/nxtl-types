@@ -17,6 +17,15 @@ import type {
 } from "@nxtl/nxtl-types";
 
 // Exercise the published entry point, not a source-file shortcut.
+const episodeRequest = {
+    organizationId: "organization",
+} satisfies RequestOf<"episode">;
+
+const episodeResult = {
+    status: 200,
+    body: { episode: "0193a2f0-0000-7000-8000-000000000001" },
+} satisfies ResultOf<"episode">;
+
 const conversation = {
     projectId: "project",
     history: "USER: Hello",
@@ -34,12 +43,14 @@ const retrieval = {
 } satisfies RequestOf<"crudRetrieveEntries">;
 
 const suggestions = {
+    episode: episodeResult.body.episode,
     suggestions: ["What are your opening hours?"],
     inference_id: null,
     token_usage: 0,
 } satisfies SuggestionsResponse;
 
 const cachedTransformation = {
+    episode: episodeResult.body.episode,
     rewritten_content: [],
     entry_ids: [],
     cache_hit: true,
@@ -234,6 +245,8 @@ const untitledJourney: UserJourneyRecord = {
 };
 
 void [
+    episodeRequest,
+    episodeResult,
     retrieval,
     invalidArtifactQuery,
     invalidSync,

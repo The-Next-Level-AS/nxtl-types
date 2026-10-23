@@ -37,6 +37,13 @@ type TransformRequest = RequestOf<"transformation">;
 type TransformResult = ResultOf<"transformation">;
 ```
 
+Initialize a conversation with authenticated `POST /episode`
+(`RequestOf<"episode">` / `ResultOf<"episode">`) and reuse its returned `episode`
+for suggestions, conversation and transformation calls. Do not generate IDs
+from the visitor's clock. If an ID is omitted, suggestions and transformations
+return the allocated ID in their response body, including cache hits;
+conversation streams return it in `X-Episode-ID`.
+
 ## Contract ownership
 
 Define NXTL wire contracts and shared domain models here, then import them with
